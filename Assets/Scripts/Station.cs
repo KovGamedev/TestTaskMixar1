@@ -9,6 +9,7 @@ public class Station
     public StationsCode CheckedFrom { get; private set; }
 
     [SerializeField] private StationsCode _code;
+    [SerializeField] private List<LinesColor> _linesColor;
     [SerializeField] private List<StationsCode> _connections;
 
     public Station(StationsCode code, List<StationsCode> connections)
@@ -38,5 +39,10 @@ public class Station
     public List<StationsCode> GetConnections()
     {
         return new List<StationsCode>(_connections);
+    }
+
+    public List<LinesColor> GetLinesColor()
+    {
+        return new List<LinesColor>(_linesColor);
     }
 }

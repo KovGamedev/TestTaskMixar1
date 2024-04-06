@@ -9,15 +9,17 @@ public class Underground : MonoBehaviour
     [SerializeField] private TMP_Dropdown _dropdownFrom;
     [SerializeField] private TMP_Dropdown _dropdownTo;
     [SerializeField] private TextMeshProUGUI _shortestWayText;
+    [SerializeField] private TextMeshProUGUI _transfersText;
 
     private Dictionary<StationsCode, Station> _stationsDictionary = new();
     private Queue<Station> _calculationQueue = new();
+    private int _transfers = 0;
 
     public void CalculateShortestPath()
     {
         ResetCalculationData();
+        CalculateStations();
         CalculatePath();
-        ShowPath();
     }
 
     private void ResetCalculationData()
@@ -27,9 +29,10 @@ public class Underground : MonoBehaviour
             pair.Value.SetUnchecked();
         }
         _calculationQueue = new();
+        _transfers = 0;
     }
 
-    private void CalculatePath()
+    private void CalculateStations()
     {
         var stationFrom = _stationsDictionary[(StationsCode)_dropdownFrom.value];
         _calculationQueue.Enqueue(stationFrom);
@@ -50,18 +53,34 @@ public class Underground : MonoBehaviour
         }
     }
 
-    private void ShowPath()
+    private void CalculatePath()
     {
-        var checkedFrom = (StationsCode)_dropdownTo.value;
         var path = "";
+        var checkedFrom = (StationsCode)_dropdownTo.value;
+        var linesColors = new List<List<LinesColor>>() { _stationsDictionary[checkedFrom].GetLinesColor() };
         while (checkedFrom != (StationsCode)_dropdownFrom.value)
         {
             path = $"-{checkedFrom}{path}";
             checkedFrom = _stationsDictionary[checkedFrom].CheckedFrom;
+            linesColors.Add(_stationsDictionary[checkedFrom].GetLinesColor());
         }
         path = $"{checkedFrom}{path}";
-
         _shortestWayText.text = path;
+
+        if (2 < linesColors.Count)
+        {
+            linesColors[0] = new List<LinesColor>(linesColors[0].Intersect(linesColors[1]));
+            linesColors[1] = new List<LinesColor>(linesColors[0]);
+            for (var i = 2; i < linesColors.Count; i++)
+            {
+                var intersections = linesColors[i].Intersect(linesColors[i - 1]);
+                if (intersections.Count() == 0)
+                    _transfers++;
+                else
+                    linesColors[i] = new List<LinesColor>(intersections);
+            }
+        }
+        _transfersText.text = $"Transfers: {_transfers}";
     }
 
     private void Start()
