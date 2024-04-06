@@ -47,7 +47,12 @@ public class Underground : MonoBehaviour
                 if (_stationsDictionary[connection].Calculated)
                     continue;
 
-                _stationsDictionary[connection].SetCheckedFrom(currentStation.GetCode());
+                var possibleLinesColor = new List<LinesColor>(
+                    currentStation.GetLinesColor().Intersect(_stationsDictionary[connection].GetLinesColor())
+                );
+                var lineColor = 0 < possibleLinesColor.Count() ? possibleLinesColor[0] : currentStation.GetLinesColor()[0];
+
+                _stationsDictionary[connection].SetCheckedFrom(currentStation.GetCode(), lineColor);
                 _calculationQueue.Enqueue(_stationsDictionary[connection]);
             }
         }
@@ -57,30 +62,18 @@ public class Underground : MonoBehaviour
     {
         var path = "";
         var checkedFrom = (StationsCode)_dropdownTo.value;
-        var linesColors = new List<List<LinesColor>>() { _stationsDictionary[checkedFrom].GetLinesColor() };
+        var linesColors = new List<LinesColor>() { _stationsDictionary[checkedFrom].FromLine };
         while (checkedFrom != (StationsCode)_dropdownFrom.value)
         {
             path = $"-{checkedFrom}{path}";
             checkedFrom = _stationsDictionary[checkedFrom].CheckedFrom;
-            linesColors.Add(_stationsDictionary[checkedFrom].GetLinesColor());
+            if (!linesColors.Contains(_stationsDictionary[checkedFrom].FromLine))
+                linesColors.Add(_stationsDictionary[checkedFrom].FromLine);
         }
         path = $"{checkedFrom}{path}";
         _shortestWayText.text = path;
 
-        if (2 < linesColors.Count)
-        {
-            linesColors[0] = new List<LinesColor>(linesColors[0].Intersect(linesColors[1]));
-            linesColors[1] = new List<LinesColor>(linesColors[0]);
-            for (var i = 2; i < linesColors.Count; i++)
-            {
-                var intersections = linesColors[i].Intersect(linesColors[i - 1]);
-                if (intersections.Count() == 0)
-                    _transfers++;
-                else
-                    linesColors[i] = new List<LinesColor>(intersections);
-            }
-        }
-        _transfersText.text = $"Transfers: {_transfers}";
+        _transfersText.text = $"Transfers: {linesColors.Count - 1}";
     }
 
     private void Start()
