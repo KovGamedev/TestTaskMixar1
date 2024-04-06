@@ -567,6 +567,7 @@ MonoBehaviour:
     _connections: 040000000a000000
   _dropdownFrom: {fileID: 701648090}
   _dropdownTo: {fileID: 622757338}
+  _shortestWayText: {fileID: 1721153573}
 --- !u!4 &228364643
 Transform:
   m_ObjectHideFlags: 0
@@ -1403,7 +1404,19 @@ MonoBehaviour:
     m_Options: []
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 228364642}
+        m_TargetAssemblyTypeName: Underground, Assembly-CSharp
+        m_MethodName: CalculateShortestPath
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_AlphaFadeSpeed: 0.15
 --- !u!114 &622757339
 MonoBehaviour:
@@ -1536,7 +1549,19 @@ MonoBehaviour:
     m_Options: []
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 228364642}
+        m_TargetAssemblyTypeName: Underground, Assembly-CSharp
+        m_MethodName: CalculateShortestPath
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_AlphaFadeSpeed: 0.15
 --- !u!114 &701648091
 MonoBehaviour:
