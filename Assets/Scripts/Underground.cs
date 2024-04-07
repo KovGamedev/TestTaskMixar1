@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -13,13 +14,12 @@ public class Underground : MonoBehaviour
 
     private Dictionary<StationsCode, Station> _stationsDictionary = new();
     private Queue<Station> _calculationQueue = new();
-    private int _transfers = 0;
 
     public void CalculateShortestPath()
     {
         ResetCalculationData();
         CalculateStations();
-        CalculatePath();
+        CalculateAllPaths();
     }
 
     private void ResetCalculationData()
@@ -29,7 +29,6 @@ public class Underground : MonoBehaviour
             pair.Value.SetUnchecked();
         }
         _calculationQueue = new();
-        _transfers = 0;
     }
 
     private void CalculateStations()
@@ -40,7 +39,7 @@ public class Underground : MonoBehaviour
         {
             var currentStation = _calculationQueue.Dequeue();
             if (currentStation.GetCode() == (StationsCode)_dropdownTo.value)
-                break;
+                continue;
 
             foreach (var connection in currentStation.GetConnections())
             {
@@ -58,22 +57,49 @@ public class Underground : MonoBehaviour
         }
     }
 
-    private void CalculatePath()
+    private void CalculateAllPaths()
     {
-        var path = "";
-        var checkedFrom = (StationsCode)_dropdownTo.value;
-        var linesColors = new List<LinesColor>() { _stationsDictionary[checkedFrom].FromLine };
-        while (checkedFrom != (StationsCode)_dropdownFrom.value)
+        var allPaths = new List<string>();
+        var allTransfers = new List<int>();
+        foreach (var connection in _stationsDictionary[(StationsCode)_dropdownTo.value].GetConnections())
         {
-            path = $"-{checkedFrom}{path}";
+            CalculatePath(connection, out var newPath, out var transfersNumber);
+            if (newPath[0].ToString() == ((StationsCode)_dropdownFrom.value).ToString())
+            {
+                allPaths.Add(newPath);
+                allTransfers.Add(transfersNumber);
+            }
+        }
+        if (0 < allTransfers.Count)
+        {
+            var targetIndex = allTransfers.IndexOf(allTransfers.Min());
+            _shortestWayText.text = allPaths[targetIndex];
+            _transfersText.text = $"Transfers: {allTransfers[targetIndex]}";
+        }
+        else
+        {
+            _shortestWayText.text = ((StationsCode)_dropdownTo.value).ToString();
+            _transfersText.text = "Transfers: 0";
+        }
+    }
+
+    private void CalculatePath(StationsCode targetStationConnectionCode, out string path, out int transfersNumber)
+    {
+        var stationTo = _stationsDictionary[(StationsCode)_dropdownTo.value];
+        var checkedFrom = targetStationConnectionCode;
+        var linesColors = new List<LinesColor>() { _stationsDictionary[checkedFrom].FromLine };
+        path = $"{stationTo.GetCode()}";
+        while (checkedFrom != (StationsCode)_dropdownFrom.value && checkedFrom != _stationsDictionary[checkedFrom].CheckedFrom)
+        {
+            path = $"{checkedFrom}-{path}";
             checkedFrom = _stationsDictionary[checkedFrom].CheckedFrom;
             if (!linesColors.Contains(_stationsDictionary[checkedFrom].FromLine))
                 linesColors.Add(_stationsDictionary[checkedFrom].FromLine);
         }
-        path = $"{checkedFrom}{path}";
-        _shortestWayText.text = path;
-
-        _transfersText.text = $"Transfers: {linesColors.Count - 1}";
+        path = $"{checkedFrom}-{path}";
+        if (!linesColors.Contains(_stationsDictionary[(StationsCode)_dropdownTo.value].FromLine))
+            linesColors.Add(_stationsDictionary[(StationsCode)_dropdownTo.value].FromLine);
+        transfersNumber = linesColors.Count - 1;
     }
 
     private void Start()
@@ -85,7 +111,7 @@ public class Underground : MonoBehaviour
 
     private void AddAllStations(TMP_Dropdown dropdown)
     {
-        var stationCodes = System.Enum.GetNames(typeof(StationsCode));
+        var stationCodes = Enum.GetNames(typeof(StationsCode));
         dropdown.AddOptions(stationCodes.ToList<string>());
     }
 
