@@ -7,7 +7,6 @@ public class Station
 {
     public bool Calculated { get; private set; }
     public StationsCode CheckedFrom { get; private set; }
-    public LinesColor FromLine { get; private set; }
 
     [SerializeField] private StationsCode _code;
     [SerializeField] private List<LinesColor> _linesColor;
@@ -24,14 +23,12 @@ public class Station
     {
         Calculated = false;
         CheckedFrom = _code;
-        FromLine = _linesColor[0];
     }
 
-    public void SetCheckedFrom(StationsCode code, LinesColor linesColor)
+    public void SetCheckedFrom(StationsCode code)
     {
         Calculated = true;
         CheckedFrom = code;
-        FromLine = linesColor;
     }
 
     public StationsCode GetCode()
