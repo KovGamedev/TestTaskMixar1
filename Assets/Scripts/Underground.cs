@@ -86,40 +86,30 @@ public class Underground : MonoBehaviour
         if (0 < allTransfers.Count)
         {
             var shortestPathStringLength = int.MaxValue;
-            var targetIndexes = new List<int>();
+            var targetPathIndexes = new List<int>();
             var targetTransfers = new List<int>();
             for (var i = 0; i < allPaths.Count; i++)
             {
                 if (allPaths[i].Length < shortestPathStringLength)
                 {
-                    targetIndexes = new();
+                    targetPathIndexes = new();
                     targetTransfers = new();
                     shortestPathStringLength = allPaths[i].Length;
                 }
                 if (allPaths[i].Length == shortestPathStringLength) {
-                    targetIndexes.Add(i);
+                    targetPathIndexes.Add(i);
                     targetTransfers.Add(allTransfers[i]);
                 }
             }
             var targetIndex = targetTransfers.IndexOf(allTransfers.Min());
-            _shortestWayText.text = allPaths[targetIndexes[targetIndex]];
-            _transfersText.text = $"Transfers: {allTransfers[targetIndexes[targetIndex]]}";
+            _shortestWayText.text = $"Shortest path: {allPaths[targetPathIndexes[targetIndex]]}";
+            _transfersText.text = $"Transfers: {allTransfers[targetPathIndexes[targetIndex]]}";
         }
         else
         {
             _shortestWayText.text = ((StationsCode)_dropdownTo.value).ToString();
             _transfersText.text = "Transfers: 0";
         }
-        //_shortestWayText.text = "";
-        //foreach (var path in allPaths)
-        //{
-        //    _shortestWayText.text += path + Environment.NewLine;
-        //}
-        //_transfersText.text = "";
-        //foreach (var transfer in allTransfers)
-        //{
-        //    _transfersText.text += transfer + Environment.NewLine;
-        //}
     }
 
     private void CalculatePath(StationsCode targetStationConnectionCode, out string path, out int transfersNumber)
@@ -140,6 +130,7 @@ public class Underground : MonoBehaviour
         }
         path = $"{checkedFrom}-{path}";
         linesColors.Add(_stationsDictionary[checkedFrom].GetLinesColor());
+        linesColors.Add(_stationsDictionary[codeFrom].GetLinesColor());
         if (_isCalculatoinReversed)
         {
             StringBuilder reversed = new();
